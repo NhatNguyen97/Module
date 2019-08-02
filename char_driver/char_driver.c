@@ -81,7 +81,7 @@ int char_hw_write_data(char_dev_t *hw, int start_reg, int num_regs, char* kbuf)
         	write_bytes = NUM_DATA_REGS - start_reg;
         	hw->status_regs[DEVICE_STATUS_REG] |= STS_DATAREGS_OVERFLOW_BIT;
         }
-        memcpy(kbuf, hw->data_regs + start_reg, write_bytes);
+        memcpy(hw->data_regs + start_reg, kbuf, write_bytes);
         hw->status_regs[WRITE_COUNT_L_REG] += 1;
         if (hw->status_regs[WRITE_COUNT_L_REG] == 0)
         	hw->status_regs[READ_COUNT_H_REG] += 1;
@@ -115,7 +115,7 @@ static int char_driver_release(struct inode *inode, struct file *filp)
         printk("Handle closed event\n");
         return 0;
 }
-static ssize_t char_driver_read(struct file *flip, char __user *user_buf, size_t len, loff_t *off)
+static ssize_t char_driver_read(struct file *filp, char __user *user_buf, size_t len, loff_t *off)
 {
 	char *kernel_buf = NULL;
 	int num_bytes = 0;
@@ -133,14 +133,14 @@ static ssize_t char_driver_read(struct file *flip, char __user *user_buf, size_t
 	return num_bytes;
 }
 
-static ssize_t char_driver_write(struct file *flip, const char __user *user_buf, size_t len, loff_t *off)
+static ssize_t char_driver_write(struct file *filp, const char __user *user_buf, size_t len, loff_t *off)
 {
 	char *kernel_buf = NULL;
 	int num_bytes = 0;
 	printk("Handle write event start from %lld, %zu bytes\n", *off, len);
 	kernel_buf = kzalloc(len, GFP_KERNEL);
 	if(copy_from_user(kernel_buf, user_buf, len))
-		return EFAULT;
+		return -EFAULT;
 	num_bytes = char_hw_read_data(char_drv.char_hw, *off, len, kernel_buf);
 	printk("read %d bytes from HW\n", num_bytes);
 	if (num_bytes < 0)
