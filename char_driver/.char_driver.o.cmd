@@ -855,6 +855,14 @@ deps_/home/nhat_nguyen/learn/linux/driver/char_driver/char_driver.o := \
   include/linux/kasan.h \
   include/linux/cdev.h \
   /home/nhat_nguyen/learn/linux/driver/char_driver/char_driver.h \
+  include/linux/uaccess.h \
+  include/linux/kasan-checks.h \
+  arch/x86/include/asm/uaccess.h \
+    $(wildcard include/config/x86/intel/usercopy.h) \
+  arch/x86/include/asm/smap.h \
+    $(wildcard include/config/x86/smap.h) \
+  arch/x86/include/asm/extable.h \
+  arch/x86/include/asm/uaccess_64.h \
 
 /home/nhat_nguyen/learn/linux/driver/char_driver/char_driver.o: $(deps_/home/nhat_nguyen/learn/linux/driver/char_driver/char_driver.o)
 
