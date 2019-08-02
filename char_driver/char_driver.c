@@ -4,6 +4,7 @@
 #include <linux/slab.h>
 #include <linux/cdev.h>
 #include "char_driver.h"
+#include <linux/uaccess.h>
 
 #define DRIVER_AUTHOR "Nguyen Van Nhat"
 #define DRIVER_DESC "Charater Device Driver"
