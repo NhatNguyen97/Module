@@ -39,7 +39,7 @@ void write_data_chardev()
 	int ret = 0;
 	char user_buf[BUFFER];
 	printf("Enter your message: ");
-	scanf(" %[^\n]\s", user_buf);
+	scanf(" %[^\n]s", user_buf);
 	int fd = open_char_dev();
 	ret = write(fd, user_buf, strlen(user_buf) + 1);
 	close_char_dev(fd);

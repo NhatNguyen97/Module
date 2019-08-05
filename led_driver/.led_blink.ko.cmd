@@ -1,0 +1,1 @@
+cmd_/home/nhat_nguyen/Learn_Linux/driver/Module/led_driver/led_blink.ko := ld -r -m elf_x86_64 -z max-page-size=0x200000 -T ./scripts/module-common.lds --build-id  -o /home/nhat_nguyen/Learn_Linux/driver/Module/led_driver/led_blink.ko /home/nhat_nguyen/Learn_Linux/driver/Module/led_driver/led_blink.o /home/nhat_nguyen/Learn_Linux/driver/Module/led_driver/led_blink.mod.o ;  true

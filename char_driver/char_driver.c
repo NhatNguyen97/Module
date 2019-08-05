@@ -5,7 +5,7 @@
 #include <linux/cdev.h>
 #include "char_driver.h"
 #include <linux/uaccess.h>
-
+#include <linux/gpio.h>
 #define DRIVER_AUTHOR "Nguyen Van Nhat"
 #define DRIVER_DESC "Charater Device Driver"
 #define DRIVER_VERSION "2"
