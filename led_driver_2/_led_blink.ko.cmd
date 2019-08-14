@@ -1,1 +1,0 @@
-cmd_/home/pi/learn/driver/Module/led_driver/led_blink.ko := ld -r  -EL -T ./scripts/module-common.lds -T ./arch/arm/kernel/module.lds  --build-id  -o /home/pi/learn/driver/Module/led_driver/led_blink.ko /home/pi/learn/driver/Module/led_driver/led_blink.o /home/pi/learn/driver/Module/led_driver/led_blink.mod.o ;  true
