@@ -6,7 +6,7 @@
 #include <linux/delay.h>
 #include <linux/uaccess.h>
 #include <linux/kernel.h>
-#include <wiringPi.h>
+
 #define DRIVER_AUTHOR "Nhat Nguyen"
 #define DRIVER_DESC   "sensor_temperature"
 
@@ -31,21 +31,23 @@ void request_sensor(void)
 	gpio_request(gpioSENSOR,"sensor");
 	gpio_direction_output(gpioSENSOR,1);
 	gpio_set_value(gpioSENSOR,0);
-	udelay(30);
+	msleep(18);
 	gpio_set_value(gpioSENSOR,1);
-	udelay(10);
-	gpio_set_value(gpioSENSOR,0);
+	udelay(40);
+	gpio_direction_input(gpioSENSOR);
 	printk("request successfully!");
 }
 
 void response_sensor(void)
 {
-	c=0;
-	gpio_direction_input(gpioSENSOR);
-	while( 1 == gpio_get_value(gpioSENSOR) && c <1000000000)
-		c++;
+	int c=0;
+	printk("gpio1: %d",gpio_get_value(gpioSENSOR));
+	while( 1 == gpio_get_value(gpioSENSOR) && c <1000000)
+	{	c++;
+		udelay(40);
+	}
 	printk("c: %d",c);
-	printk("gpio: %d",gpio_get_value(gpioSENSOR));
+	printk("gpio2: %d",gpio_get_value(gpioSENSOR));
 	printk("response successfully!");
 }
 void sensor_hw_read_data(void)
