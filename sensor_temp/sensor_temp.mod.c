@@ -38,14 +38,19 @@ __attribute__((section("__versions"))) = {
 	{ 0xafb7f488, "device_create" },
 	{ 0x25bae955, "__class_create" },
 	{ 0xe3ec2f2b, "alloc_chrdev_region" },
+	{ 0xf4fa543b, "arm_copy_to_user" },
+	{ 0x697ad648, "kmem_cache_alloc_trace" },
+	{ 0x803600d2, "kmalloc_caches" },
+	{ 0xdb7305a1, "__stack_chk_fail" },
 	{ 0xf972999c, "gpiod_get_raw_value" },
 	{ 0x8e8383ad, "gpiod_direction_input" },
-	{ 0x8e865d3c, "arm_delay_ops" },
-	{ 0xf9a482f9, "msleep" },
 	{ 0xba32bd1b, "gpiod_set_raw_value" },
 	{ 0x42086fb8, "gpiod_direction_output_raw" },
 	{ 0x8b489103, "gpio_to_desc" },
 	{ 0x47229b5c, "gpio_request" },
+	{ 0x5f754e5a, "memset" },
+	{ 0x8e865d3c, "arm_delay_ops" },
+	{ 0x8f678b07, "__stack_chk_guard" },
 	{ 0x2e5810c6, "__aeabi_unwind_cpp_pr1" },
 	{ 0x7c32d0f0, "printk" },
 	{ 0xb1ad28e0, "__gnu_mcount_nc" },
@@ -57,4 +62,4 @@ __attribute__((section(".modinfo"))) =
 "depends=";
 
 
-MODULE_INFO(srcversion, "05F054CFD5FE23C5F49162A");
+MODULE_INFO(srcversion, "03DE7EFC5939294096A218F");

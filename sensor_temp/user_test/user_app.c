@@ -24,15 +24,21 @@ void close_sensor_dev(int fd)
 
 void read_data_sensor_dev()
 {
-	int ret = 0;
+	int count=0,ret = 0;
+	double humi=0,temp=0;
 	char user_buf[BUFFER];
 	int fd = open_sensor_dev();
 	ret = read(fd, user_buf, BUFFER);
 	close_sensor_dev(fd);
+	humi = user_buf[0] + 0.1*user_buf[1];
+	temp = user_buf[2] + 0.1*user_buf[3];
 	if (ret < 0)
 		printf("Could not read a message from %s\n", DEVICE_NODE);
 	else
-		printf("Read a message from %s: %s\n", DEVICE_NODE, user_buf);
+	{
+		if(humi>0 && temp>0)
+			printf("Read message from %s: Humidity:  %f, Temperature:  %f\n", DEVICE_NODE, humi, temp );
+	}
 }
 
 void write_data_sensor_dev()

@@ -4,11 +4,8 @@
 #include <stdint.h>
 #include <sched.h>
 #include <string.h>
-#define MAXTIMINGS	85
-#define DHTPIN		7
-#define DHT_MAXCOUNT 20000
+#define DHTPIN		25
 #define DHT_MAXCOUNT_0 32000
-#define DHT_MAXCOUNT_1 14500
 #define DHT_PULSES 41
 int dht11_dat[5] = { 0, 0, 0, 0, 0 };
 
@@ -32,13 +29,13 @@ void read_dht11_dat()
 	/* pull pin down for 18 milliseconds */
 	pinMode( DHTPIN, OUTPUT );
 	digitalWrite( DHTPIN, LOW );
-	delay( 20 );
+	delay( 18 );
 	/* then pull it up for 40 microseconds */
 	digitalWrite( DHTPIN, HIGH );
 	delayMicroseconds(40);
 	/* prepare to read the pin */
 	pinMode( DHTPIN, INPUT );
-	digitalWrite(DHTPIN,LOW);
+	//digitalWrite(DHTPIN,LOW);
 	delayMicroseconds(80);
 	
 	for (int i=0; i < DHT_PULSES*2; i+=2)
@@ -66,7 +63,7 @@ void read_dht11_dat()
 			}
 		}
 	}
-	set_default_priority();
+	//set_default_priority();
  	int  threshold = 0;
 	for (i=2; i < DHT_PULSES*2; i+=2) {
 		threshold += pulseCounts[i];

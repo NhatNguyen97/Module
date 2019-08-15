@@ -6,12 +6,17 @@
 #include <linux/delay.h>
 #include <linux/uaccess.h>
 #include <linux/kernel.h>
-
+#include <linux/printk.h>
 #define DRIVER_AUTHOR "Nhat Nguyen"
 #define DRIVER_DESC   "sensor_temperature"
 
+#define HIGH 1
+#define LOW 0
+#define DHT_PULSES 41
+#define DHT_MAXCOUNT 32000
+
 /************************* Declare *******************************/
-int gpioSENSOR = 26; /* use GPIO 26*/
+#define gpioSENSOR 26 /* use GPIO 26*/
 
 
 /* create struct sensor_drv */
@@ -26,91 +31,70 @@ struct _sensor_drv
 
 /************************** LED Device ***************************/
 
-void request_sensor(void)
+void sensor_hw_read_data(char *kernel_buf)
 {
+	int i=0,threshold=0;
+	int pulseCounts[DHT_PULSES*2] = {0};
+	int dht11_dat[5] = {0};
 	gpio_request(gpioSENSOR,"sensor");
-	gpio_direction_output(gpioSENSOR,1);
-	gpio_set_value(gpioSENSOR,0);
-	msleep(18);
-	gpio_set_value(gpioSENSOR,1);
-	udelay(40);
+	gpio_direction_output(gpioSENSOR,HIGH);
+	gpio_set_value(gpioSENSOR,LOW);
+	mdelay(20);
+	gpio_set_value(gpioSENSOR,HIGH);
+	udelay(35);
+	printk("MCU request successfully!");
 	gpio_direction_input(gpioSENSOR);
-	printk("request successfully!");
-}
+	udelay(80);
+	printk("DH11 response successfully!");
 
-void response_sensor(void)
-{
-	int c=0;
-	printk("gpio1: %d",gpio_get_value(gpioSENSOR));
-	while( 1 == gpio_get_value(gpioSENSOR) && c <1000000)
-	{	c++;
-		udelay(40);
-	}
-	printk("c: %d",c);
-	printk("gpio2: %d",gpio_get_value(gpioSENSOR));
-	printk("response successfully!");
-}
-void sensor_hw_read_data(void)
-{
-	int buffer[5];
-	int i,j,checksum,temp,humi;
-	/*
-	gpio_request(gpioSENSOR, "sensor");
-	gpio_direction_output(gpioSENSOR,1);
-	gpio_set_value(gpioSENSOR,1);
-	udelay(10);
-	gpio_set_value(gpioSENSOR,0);
-	udelay(30);
-	gpio_set_value(gpioSENSOR,1);
-	// Direct to output
-	gpio_direction_input(gpioSENSOR);
-	udelay(10);
-	// Get current value
-	
-	printk("current state: %d",gpio_get_value(gpioSENSOR));
-	if(1 == gpio_get_value(gpioSENSOR))
+	for (i=0; i < DHT_PULSES*2; i+=2)
 	{
-		printk("failed 1");
-	       	return -1;
-	}
-	else
-		while(0 == gpio_get_value(gpioSENSOR));
-	udelay(30);
-	if(0 == gpio_get_value(gpioSENSOR))
-	{	
-		printk("failed 0");
-		return -1;
-	}
-	else 
-		while(1 == gpio_get_value(gpioSENSOR));
-	*/
-	request_sensor();
-	response_sensor();
-	//Read data
-	/*
-	for(i=0 ; i<5 ; i++)
-	{
-		for(j=0 ; j<8 ; j++)
+		while(0 == gpio_get_value(gpioSENSOR))
 		{
-			while(0 == gpio_get_value(gpioSENSOR));
-			udelay(30);
-			if(1 == gpio_get_value(gpioSENSOR))
+			if(++pulseCounts[i] >= DHT_MAXCOUNT)
 			{
-				buffer[i] = (1 << (7-j));
-				while(gpio_get_value(gpioSENSOR));
+				return -1;
+			}
+		
+		}
+		while(1 == gpio_get_value(gpioSENSOR))
+		{
+			if(++pulseCounts[i+1] >= DHT_MAXCOUNT)
+			{
+				pulseCounts[i+1] = DHT_MAXCOUNT;
+				return -1;
 			}
 		}
 	}
-	//Checksum
-	checksum = buffer[0] + buffer[1] + buffer[2] + buffer[3];
-	if(checksum != buffer[4])
-		return -1;
-	//Get data
-	temp = buffer[2];
-	humi  = buffer[0];
-	printk("temperature: %d\n",temp);
-	printk("humidity: %d\n",humi);
-	*/
+	for (i=2; i < DHT_PULSES*2; i+=2)
+	{
+		threshold += pulseCounts[i];
+	}
+	threshold /= DHT_PULSES-1;
+	for (i=3; i < DHT_PULSES*2; i+=2) 
+	{
+		int index = (i-3)/16;
+		dht11_dat[index] <<= 1;
+		if (pulseCounts[i] >= threshold) {
+			dht11_dat[index] |= 1;
+		}
+	}	
+	if ( dht11_dat[4] == ( (dht11_dat[0] + dht11_dat[1] + dht11_dat[2] + dht11_dat[3]) & 0xFF) )
+	{
+		
+		for(i=0 ; i<4 ; i++)
+		{
+			kernel_buf[i] = dht11_dat[i];
+		}
+		//printk("kernel_buf: %s",kernel_buf);
+		//f = dht11_dat[2] * 9. / 5. + 32;
+		//printk("Humidity = %d.%d %% Temperature = %d.%d *Cn",
+		//	(int)dht11_dat[0],(int) dht11_dat[1],(int) dht11_dat[2],(int)dht11_dat[3]);
+	}
+	else
+ 	{
+		printk("Data not good, skip\n" );
+	}
 }
 
 /************************** LED OS ******************************/
@@ -128,34 +112,23 @@ static int sensor_driver_release(struct inode *inode, struct file *filp)
 	printk("Handle closed event\n");
 	return 0;
 }
-/*
-static ssize_t sensor_driver_write(struct file *filp, const char __user *user_buf, size_t len, loff_t *off)
-{
-	char *kernel_buf = NULL;
-	printk("Handle write event start from %lld, %zu bytes\n", *off, len);
-	kernel_buf = kzalloc(len, GFP_KERNEL);
-	kernel_buf = kzalloc(len, GFP_KERNEL);
-	if (copy_from_user(kernel_buf, user_buf, len))
-		return -EFAULT;
-	printk("%s",kernel_buf);
-	
-	sensor_hw_read_data(user_buf);	
-	return 0;
-} */
 
 static ssize_t sensor_driver_read(struct file *filp, char __user *user_buf, size_t len, loff_t *off)
 {
-	sensor_hw_read_data();
+	char *kernel_buf = NULL;
+	kernel_buf = kzalloc(5, GFP_KERNEL);
+	sensor_hw_read_data(kernel_buf);
+	if( copy_to_user(user_buf, kernel_buf, 5) )
+		return -EFAULT;
 	return 0;
 }
-
 
 static struct file_operations fops =
 {
 	.owner 	= THIS_MODULE,
 	.open	= sensor_driver_open,
 	.release = sensor_driver_release,
-	.read 	= sensor_driver_read, 
+	.read 	= sensor_driver_read,
 };
 
 
@@ -203,7 +176,8 @@ static int __init init_sensor_blink(void)
 	{
 		printk("failed to add a char device to the system\n");
 		goto failed_allocate_cdev;
-	}   	
+	}
+
 	return 0;
 	
 	/* Return failed */
