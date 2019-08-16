@@ -16,7 +16,7 @@
 #define FALSE 0 
 #define PORT 1500
 #define BUFFER 1024
-#define DEVICE_NODE "dev/sensor_device"
+#define DEVICE_NODE "/dev/sensor_device"
 	
 void error(char *msg)
 {
@@ -26,15 +26,15 @@ void error(char *msg)
 
 int convert_ChartoInt(char *c)
 {
-         int i=0,s=0,sum=0,a[10];
+         int i=0,s=0,a[10];
          int len = strlen(c);
          for(i=0 ; i<len ; i++)
          {
                  a[i] = c[i] - '0';
          }
 	 for(i=0 ; i<len ; i++)
-		sum = a[i] + s*10;
-         return sum;
+		s = a[i] + s*10;
+         return s;
 }
 
 
@@ -44,7 +44,7 @@ int open_sensor_dev()
 	int fd = open(DEVICE_NODE, O_RDWR);
 	if( fd < 0 )
 	{
-		printf("Can not open the device file\n");
+		printf("Can not open the device file %d\n",fd);
 		exit(1);
 	}
 	return fd;
@@ -57,10 +57,10 @@ void close_sensor_dev(int fd)
 
 void read_data(char *msg)
 {
-          int count=0,ret = 0;
+          int count=0,fd = -1,ret = 0;
           double humi=0,temp=0;
           char user_buf[BUFFER];
-          int fd = open_sensor_dev();
+          fd = open_sensor_dev();
           ret = read(fd, user_buf, BUFFER);
           close_sensor_dev(fd);
           humi = user_buf[0];
@@ -71,8 +71,10 @@ void read_data(char *msg)
           {
                	if(humi>0 && temp>0)
 		{
-			msg[0] = humi;
-			msg[1] = temp;
+			msg[0] = user_buf[0];
+			msg[1] = user_buf[1];
+			msg[2] = user_buf[2];
+			msg[3] = user_buf[3];
 		}
           }
  }
@@ -193,28 +195,33 @@ int main(int argc , char *argv[])
 				{	
 					printf("run");
 					int s;
-					/* get real time */
-   					time(&rawtime);
-   					info = localtime( &rawtime );
 					char *moment = (char*)malloc(BUFFER* sizeof(char));
 					strcpy(moment, asctime(info));
-					int len = strlen(moment) - 1;
-					moment[len] = '\t';
+					/* get time want to sleep: once read / second */
 					s  = convert_ChartoInt(buffer);	
-					/* read data from sensor */
 					while(--s > 0)
 					{
+						/* get really time */
+						time(&rawtime);
+   						info = localtime( &rawtime );
+						strcpy(moment, asctime(info));
+						int len = strlen(moment) - 1;
+						moment[len] = '\t';
+						buffer[valread] = '\0';
+						/* read data from sensor */
 						read_data(buffer_sensor);
-						strcat(moment, buffer);
+						strcat(moment, buffer_sensor);
 						puts(moment);
 						FILE *flog = fopen("chat_log.txt","a+");
 						fprintf(flog, "%s\n", moment);
 						fclose(flog); 
-						send(client_socket[i] , buffer , strlen(moment) , 0 );
-						sleep(10);
+						send(client_socket[i] , buffer_sensor, strlen(moment) , 0 );
+						sleep(1);
 					}
 					free(buffer);
 					buffer = '\0';
+					free(buffer_sensor);
+					buffer_sensor = '\0';
 					free(moment);
 					moment = '\0';
 				} 	 

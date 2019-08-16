@@ -11,7 +11,7 @@
 #include <pthread.h>
 
 #define PORT 1500
-#define MESS_SIZE 500
+#define MESS_SIZE 1024
 #define NAME_SIZE 20
 
 char name[20] = {0} ;
@@ -22,15 +22,31 @@ void error(char *msg)
 	exit(1);
 }
 
+void convert_CharToInt(char *c,int *a)
+{
+	int i;
+	for(i=0 ; i<strlen(c) ; i++)
+	{
+		a[i] = c[i] - '0';
+	}
+}
+
 
 void *receive(void *varg)
 {
+	int *a = (int*)malloc(20*sizeof(int));
 	char *msg = (char*)malloc(MESS_SIZE*sizeof(char));
 	while(1)
 	{
 		bzero(msg,MESS_SIZE);
 		if(read(sock, msg, MESS_SIZE) > 0)
-		puts(msg);
+		{
+			convert_CharToInt(msg,a);
+			int humi=0, temp=0;
+			humi = a[0] + 0.1*a[1];
+			temp = a[2] + 0.1*a[3]; 		
+			printf("Humidity: %d%d ,Temperature: %d%d\n",a[0],a[1],a[2],a[3]); 
+		}
 	}
 }
 
