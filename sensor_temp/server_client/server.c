@@ -57,24 +57,25 @@ void close_sensor_dev(int fd)
 
 void read_data(char *msg)
 {
-          int count=0,fd = -1,ret = 0;
-          double humi=0,temp=0;
+          int count=0,fd = -1,ret = 0, humi1=0,humi2 = 0, temp1=0, temp2=0;
           char user_buf[BUFFER];
           fd = open_sensor_dev();
           ret = read(fd, user_buf, BUFFER);
           close_sensor_dev(fd);
-          humi = user_buf[0];
-          temp = user_buf[2];
+          humi1 = user_buf[0];
+	  //humi2 = user_buf[1];
+          temp1 = user_buf[2];
+	  //temp2 = user_buf[3];
           if (ret < 0)
 		printf("Could not read a message from %s\n", DEVICE_NODE);
           else
           {
-               	if(humi>0 && temp>0)
+               	if(humi1>0 && temp1>0)
 		{
-			msg[0] = user_buf[0];
-			msg[1] = user_buf[1];
-			msg[2] = user_buf[2];
-			msg[3] = user_buf[3];
+			msg[0] = humi1;
+			//msg[1] = humi2;
+			msg[1] = temp1;
+			//msg[3] = temp2;
 		}
           }
  }
@@ -180,7 +181,7 @@ int main(int argc , char *argv[])
 			{ 
 				/* Check if it was for closing , and also read the incoming message */
 				char *buffer = (char*)malloc(BUFFER * sizeof(char));
-				char *buffer_sensor = (char*)malloc(BUFFER * sizeof(char));
+				//char *buffer_sensor = (char*)malloc(BUFFER * sizeof(char));
 				if ((valread = read( sd , buffer, 1024)) == 0) 
 				{ 
 					/* Somebody disconnected , get his details and print */ 
@@ -192,32 +193,23 @@ int main(int argc , char *argv[])
 					
 				/*  send the message to client */
 				else
-				{	
-					printf("run");
-					int s;
-					char *moment = (char*)malloc(BUFFER* sizeof(char));
+				{
+					char *buffer_sensor = (char*)malloc(BUFFER * sizeof(char));	
+					char *moment = (char*)malloc(BUFFER* sizeof(char));	
+					read_data(buffer_sensor);
+					time(&rawtime);
+   					info = localtime( &rawtime );
 					strcpy(moment, asctime(info));
-					/* get time want to sleep: once read / second */
-					s  = convert_ChartoInt(buffer);	
-					while(--s > 0)
-					{
-						/* get really time */
-						time(&rawtime);
-   						info = localtime( &rawtime );
-						strcpy(moment, asctime(info));
-						int len = strlen(moment) - 1;
-						moment[len] = '\t';
-						buffer[valread] = '\0';
-						/* read data from sensor */
-						read_data(buffer_sensor);
-						strcat(moment, buffer_sensor);
-						puts(moment);
-						FILE *flog = fopen("chat_log.txt","a+");
-						fprintf(flog, "%s\n", moment);
-						fclose(flog); 
-						send(client_socket[i] , buffer_sensor, strlen(moment) , 0 );
-						sleep(1);
-					}
+					buffer[valread] = '\0';
+					/* read data from sensor */
+					strcat(moment, buffer_sensor);
+					/*
+					puts(moment);
+					FILE *flog = fopen("chat_log.txt","a+");
+					fprintf(flog, "%s\n", moment);
+					fclose(flog); 
+					*/	
+					send(client_socket[i] , moment, strlen(moment) , 0 );
 					free(buffer);
 					buffer = '\0';
 					free(buffer_sensor);
