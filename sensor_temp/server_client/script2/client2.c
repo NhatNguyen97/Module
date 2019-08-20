@@ -26,6 +26,21 @@ void error(char *msg)
 	perror(msg);
 	exit(1);
 }
+char *convert_IntToChar(int x)
+{
+      	int i=1;
+        char *s1 = (char*)calloc(4,sizeof(char));
+        int *s2 = (int*)calloc(4,sizeof(int));
+        while(x > 0)
+        {
+                s2[i] = x%10;
+                x /= 10;
+                i--;
+        }
+        for(i=0 ; i<2 ; i++)
+                s1[i] = s2[i] + '0';
+        return s1;
+}
 
 int convert_CharToInt(char *c)
 {
@@ -67,19 +82,29 @@ char *strcut_2(char *c, int n)
 }
 
 
-void processing_Temp(float temp, float a, char *msg)
+void processing_Temp(int temp1, int temp2,  int a, char *msg)
 {
-	if( temp > a)
+	if( temp1 > a)
 	{
-		char b[sizeof(float)];
-		memcpy(b,&temp, sizeof(float));
+		char *b = (char*)calloc(4,sizeof(char));
+		char *x = (char*)calloc(4,sizeof(char));
+		char c[2] = ".";
+		char d[14] = "Temperature: ";
+		char e[3] = "oC";
+		x[0] = temp2 + '0';
+		b = convert_IntToChar(temp1);
 		msg[strlen(msg) -1] = '\t';
+		strcat(msg, d);
 		strcat(msg, b);
+		strcat(msg, c);
+		strcat(msg, x);
+		strcat(msg, e);
 		limit++;
 		FILE *flog = fopen("temp_log.txt", "a+");
 		fprintf(flog, "%s\n", msg);
 		fclose(flog);
-		printf("Warning!!! The temperature is higher %f ...\n", a); 
+		if(limit > 5)
+			printf("Warning!!! The temperature is higher %doC ...\n\n", a); 
 	}
 }
 
@@ -92,22 +117,19 @@ void *receive(void *varg)
 	bzero(msg,MESS_SIZE);
 	pthread_mutex_lock(&mutex);
 	pthread_cond_wait(&cond, &mutex);
-	printf("s: %d\n",s);
-	printf("m: %d\n",m);
-	printf("t: %d\n",t);
-	printf("count_2: %d\n",count_2);
 	while(count_2 > 0)
 	{	
-			read(sock, msg, MESS_SIZE);
-			c_1 = strcut_1(msg,24);		
-			c_2 = strcut_2(msg,24);
-			float temp=0;
-			temp = (int)c_1[2] + 0.1*(int)c_1[3];
-			printf("Location: Ha Noi City\n");
-			printf("Time: %s",c_2);
-			printf("Humidity: %d.%d%, Temperature: %d.%d oC\n",(int)c_1[0], (int)c_1[1], (int)c_1[2], (int)c_1[3]);
-			processing_Temp(temp, t, c_2);
-			count_2--;
+		read(sock, msg, MESS_SIZE);
+		c_1 = strcut_1(msg,24);		
+		c_2 = strcut_2(msg,24);
+		int temp1=0, temp2;
+		temp1 = (int)c_1[2];
+	        temp2 = (int)c_1[3];
+		printf("Location: Server Room\n");
+		printf("Time: %s",c_2);
+		printf("Humidity: %d.%d%, Temperature: %d.%d oC\n",(int)c_1[0], (int)c_1[1], (int)c_1[2], (int)c_1[3]);
+		processing_Temp(temp1, temp2, t, c_2);
+		count_2--;
 	}
 	free(msg);
 	free(c_1);
