@@ -67,29 +67,18 @@ char *strcut_2(char *c, int n)
 
 void *receive(void *varg)
 {
-	char *msg = (char*)malloc(MESS_SIZE*sizeof(char));
-	char *c_1 = (char*)malloc(MESS_SIZE*sizeof(char));
-	char *c_2 = (char*)malloc(MESS_SIZE*sizeof(char));
-	//while(1)
-	//
-		bzero(msg,MESS_SIZE);
-		if(read(sock, msg, MESS_SIZE) > 0)
-		{
-			c_1 = strcut_1(msg,24);		
-			int humi=0, temp=0;
-			humi = (int)c_1[0]; //+ 0.1*(int)c[1];
-			temp = (int)c_1[1]; //+ 0.1*(int)c[3];
-			if( (humi > 60 && humi <95) && (temp > 10 && temp < 40) )
-			{
-				c_2 = strcut_2(msg,24);
-				printf("Location: Ha Noi City\n");
-				printf("Time: %s",c_2);
-				printf("Humidity: %d%, Temperature: %d oC\n",humi,temp);
-			}
-			else
-				printf("Humidity or Temperature invalid ->  Please request again\n");
-		}
-	//}
+	char *msg = (char*)calloc(MESS_SIZE,sizeof(char));
+	char *c_1 = (char*)calloc(MESS_SIZE,sizeof(char));
+	char *c_2 = (char*)calloc(MESS_SIZE,sizeof(char));
+	bzero(msg,MESS_SIZE);
+	if(read(sock, msg, MESS_SIZE) > 0)
+	{
+		c_1 = strcut_1(msg,24);		
+		c_2 = strcut_2(msg,24);
+		printf("Location: Ha Noi City\n");
+		printf("Time: %s",c_2);
+		printf("Humidity: %d.%d%, Temperature: %d.%d oC\n",(int)c_1[0], (int)c_1[1], (int)c_1[2], (int)c_1[3]);
+	}
 	free(msg);
 	free(c_1);
 	free(c_2);

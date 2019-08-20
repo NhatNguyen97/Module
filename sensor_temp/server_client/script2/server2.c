@@ -205,7 +205,7 @@ int main(int argc , char *argv[])
 						buffer_sensor = read_data();
 					}
 					while(strlen(buffer_sensor) == 0);
-					printf("len: %d",strlen(buffer_sensor));
+					//printf("len: %d",strlen(buffer_sensor));
 					time(&rawtime);
    					info = localtime( &rawtime );
 					strcpy(moment, asctime(info));
