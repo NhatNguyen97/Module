@@ -22,7 +22,7 @@ void error(char *msg)
 	perror(msg);
 	exit(1);
 }
-
+/* convert char to integer */
 int convert_CharToInt(char *c)
 {
 	int i,s=0,a[10];
@@ -36,7 +36,7 @@ int convert_CharToInt(char *c)
 	return s;
 }
 
-
+/* cut string mid -> tail*/
 char *strcut_1(char *c, int n)
 {
 	char *temp = (char*)calloc(MESS_SIZE,sizeof(char));
@@ -49,7 +49,7 @@ char *strcut_1(char *c, int n)
 	}
 	return temp;
 }
-
+/* cut string head -> mid */
 char *strcut_2(char *c, int n)
 {
 	char *temp = (char*)calloc(MESS_SIZE,sizeof(char));
@@ -62,8 +62,7 @@ char *strcut_2(char *c, int n)
 	return temp;
 }
 
-
-
+/* receive data */
 
 void *receive(void *varg)
 {
@@ -87,13 +86,11 @@ void *receive(void *varg)
 	c_2 = NULL;
 }
 
+/* send data */
 void *send_to(void *varg)
 {
 	char *msg = (char*)malloc(MESS_SIZE*sizeof(char));
-	//char *send_msg = (char*)malloc(MESS_SIZE*sizeof(char));
 	int choose = 0;
-	//while(1)
-	//{
 		printf("Do you want to measure humidity and temperature:\n");
 		printf("0. No, I don't want to measure\n");
 		printf("1. Yes, I want to measure\n");
@@ -109,9 +106,6 @@ void *send_to(void *varg)
 			default:
 				printf("Please choose 0 or 1\n");
 		}
-		//if(strcmp(msg, "0") == 0)
-		//	exit(1);
-	//}
 }
 
 
@@ -119,9 +113,7 @@ int main(int argc, char const *argv[])
 {  
     	struct sockaddr_in serv_addr; 
     	char add[20] = "127.0.0.1";
-    	//printf("Enter server address: \n");
-    	//gets(add);
-
+	/* Create socket */
     	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
 		error("Couldn't create socket");
 
@@ -129,16 +121,14 @@ int main(int argc, char const *argv[])
     	serv_addr.sin_port = htons(PORT); 
 	
 	if(inet_pton(AF_INET, add, &serv_addr.sin_addr) <= 0)
-		error("Invalid address/ Address not supported "); 
+		error("Invalid address/ Address not supported ");
+	/* Connect to server */ 
 	if (connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0) 
         	error("Connection failed"); 
-	/* After connected to server */
-	//puts("Welcome to my server, can you tell me your name: ");
-	//gets(name);
-	//strcat(name, ": ");
+	/* Create 2 thread */
 	pthread_t THREAD_1, THREAD_2;
-	pthread_create(&THREAD_1, NULL, receive, NULL);
-	pthread_create(&THREAD_2, NULL, send_to,  NULL);
+	pthread_create(&THREAD_1, NULL, receive, NULL); /*thread 1 using receive*/
+	pthread_create(&THREAD_2, NULL, send_to,  NULL); /*thread 2 using send_to*/
 	pthread_join(THREAD_1, NULL);
 	pthread_join(THREAD_2, NULL);
 	return 0; 

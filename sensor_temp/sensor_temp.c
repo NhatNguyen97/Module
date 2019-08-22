@@ -29,13 +29,14 @@ struct _sensor_drv
 	unsigned int open_cnt;
 }sensor_drv;
 
-/************************** LED Device ***************************/
+/************************** DHT11 Device ***************************/
 
 void sensor_hw_read_data(char *kernel_buf)
 {
 	int i=0,threshold=0;
 	int pulseCounts[DHT_PULSES*2] = {0};
 	int dht11_dat[5] = {0};
+	/* Change state DHT11 to active */
 	gpio_request(gpioSENSOR,"sensor");
 	gpio_direction_output(gpioSENSOR,HIGH);
 	gpio_set_value(gpioSENSOR,LOW);
@@ -46,7 +47,7 @@ void sensor_hw_read_data(char *kernel_buf)
 	gpio_direction_input(gpioSENSOR);
 	udelay(80);
 	printk("DH11 response successfully!");
-
+	/* Get data */
 	for (i=0; i < DHT_PULSES*2; i+=2)
 	{
 		while(0 == gpio_get_value(gpioSENSOR))
@@ -70,7 +71,7 @@ void sensor_hw_read_data(char *kernel_buf)
 	{
 		threshold += pulseCounts[i];
 	}
-	threshold /= DHT_PULSES-1;
+	threshold /= DHT_PULSES-1; /* thresh hold to compare, so make "0" or "1" */
 	for (i=3; i < DHT_PULSES*2; i+=2) 
 	{
 		int index = (i-3)/16;
@@ -78,7 +79,8 @@ void sensor_hw_read_data(char *kernel_buf)
 		if (pulseCounts[i] >= threshold) {
 			dht11_dat[index] |= 1;
 		}
-	}	
+	}
+	/* Compare data vs standard DHT11 */	
 	if ( dht11_dat[4] == ( (dht11_dat[0] + dht11_dat[1] + dht11_dat[2] + dht11_dat[3]) & 0xFF) )
 	{
 		
@@ -97,7 +99,7 @@ void sensor_hw_read_data(char *kernel_buf)
 	}
 }
 
-/************************** LED OS ******************************/
+/************************** DHT11 OS ******************************/
 
 /* entry points function */
 static int sensor_driver_open(struct inode *inode, struct file *filp)
@@ -132,7 +134,7 @@ static struct file_operations fops =
 };
 
 
-/* Initialized led*/
+/* Initialized DHT11*/
 static int __init init_sensor_blink(void)
 {
 	int ret = 0;
@@ -191,7 +193,7 @@ static int __init init_sensor_blink(void)
 		return ret;
 }
 
-/* Exit led*/
+/* Exit DHT11*/
 static void __exit exit_sensor_blink(void)
 {
 	/* Delete entry point*/

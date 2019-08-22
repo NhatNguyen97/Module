@@ -24,6 +24,7 @@ void error(char *msg)
 	exit(1);
 }
 
+/* Convert chat to integer */
 int convert_ChartoInt(char *c)
 {
          int i=0,s=0,a[10];
@@ -38,7 +39,7 @@ int convert_ChartoInt(char *c)
 }
 
 
-
+/* Open device file */
 int open_sensor_dev()
 {
 	int fd = open(DEVICE_NODE, O_RDWR);
@@ -49,19 +50,20 @@ int open_sensor_dev()
 	}
 	return fd;
 }
-
+/* Close device file */
 void close_sensor_dev(int fd)
 {
 	close(fd);
 }
 
+/* Read data from device file*/
 char *read_data()
 {
           int count=0,fd = -1,ret = 0, humi1=0,humi2 = 0, temp1=0, temp2=0;
           char *msg = (char*)calloc(BUFFER, sizeof(msg));
 	  char *user_buf = (char*)calloc(BUFFER, sizeof(msg)); 
           fd = open_sensor_dev();
-          ret = read(fd, user_buf, BUFFER);
+          ret = read(fd, user_buf, BUFFER); /* read data from device file and copy to user buffer*/
           close_sensor_dev(fd);
           humi1 = user_buf[0] ;
 	  humi2 = user_buf[1] + 1;
@@ -156,11 +158,6 @@ int main(int argc , char *argv[])
 			 
 			printf("Connected to client with fd: %d at : %s , port : %d \n" , new_socket , inet_ntoa(address.sin_addr) , ntohs(address.sin_port)); 
 		
-			/* Welcome 
-			char *welcome = "Welcome to my server\n";
-			if( send(new_socket, welcome, strlen(welcome), 0) != strlen(welcome) ) 
-				perror("send"); 
-			*/
 			puts("Welcome message sent successfully"); 
 				
 			for (i = 0; i < max_clients; i++) 
@@ -206,16 +203,12 @@ int main(int argc , char *argv[])
 					}
 					while(strlen(buffer_sensor) == 0);
 					printf("len: %d",strlen(buffer_sensor));
+					/* get really time */
 					time(&rawtime);
    					info = localtime( &rawtime );
 					strcpy(moment, asctime(info));
 					strcat(moment, buffer_sensor);
-					/*
-					puts(moment);
-					FILE *flog = fopen("chat_log.txt","a+");
-					fprintf(flog, "%s\n", moment);
-					fclose(flog); 
-					*/	
+					/* send message to client */	
 					send(client_socket[i] , moment, strlen(moment) , 0 );
 					free(buffer);
 					buffer = NULL;
