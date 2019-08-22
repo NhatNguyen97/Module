@@ -162,44 +162,11 @@ void *send_to(void *varg)
 		sleep(s);
 	}
 }
-/*
-void *receive(void *varg)
-{
-	char *msg = (char*)calloc(MESS_SIZE,sizeof(char));
-	char *c_1 = (char*)calloc(MESS_SIZE,sizeof(char));
-	char *c_2 = (char*)calloc(MESS_SIZE,sizeof(char));
-	bzero(msg,MESS_SIZE);
-	pthread_mutex_lock(&mutex);
-	printf("s: %d\n",s);
-	printf("m: %d\n",m);
-	printf("t: %d\n",t);
-	printf("count_2: %d\n",count_2);
-	while(1)
-	{	
-			read(sock, msg, MESS_SIZE);
-			c_1 = strcut_1(msg,24);		
-			c_2 = strcut_2(msg,24);
-			float temp;
-			temp = (int)c_1[2] + 0.1*(int)c_1[3];
-			printf("Location: Ha Noi City\n");
-			printf("Time: %s",c_2);
-			printf("Humidity: %d.%d%, Temperature: %d.%d oC\n",(int)c_1[0], (int)c_1[1], (int)c_1[2], (int)c_1[3]);
-			processing_Temp(temp, t, count);
-			count_2--;
-	}
-	//pthread_mutex_unlock(&mutex);
-	free(msg);
-	free(c_1);
-	free(c_2);
-	msg = NULL;
-	c_1 = NULL;
-	c_2 = NULL;
-}
-*/
+
 int main(int argc, char const *argv[]) 
 {  
     	struct sockaddr_in serv_addr; 
-    	char add[20] = "127.0.0.1";
+    	char add[20] = "192.168.137.49";
     	//printf("Enter server address: \n");
     	//gets(add);
 

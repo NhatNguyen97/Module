@@ -112,7 +112,7 @@ void *send_to(void *varg)
 int main(int argc, char const *argv[]) 
 {  
     	struct sockaddr_in serv_addr; 
-    	char add[20] = "127.0.0.1";
+    	char add[20] = "192.168.137.49";
 	/* Create socket */
     	if ((sock = socket(AF_INET, SOCK_STREAM, 0)) < 0) 
 		error("Couldn't create socket");
