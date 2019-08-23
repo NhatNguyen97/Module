@@ -118,8 +118,10 @@ void processing_Temp(int temp1, int temp2,  int a, char *msg)
 		fprintf(flog, "%s\n", msg);
 		fclose(flog);
 		if(limit > 5)
+		{
 			printf("Warning!!! The temperature is higher %doC ...\n\n", a);
 			system("ogg123 alert.ogg");
+		}
 		free(b);
 		free(x);
 		free(file);
