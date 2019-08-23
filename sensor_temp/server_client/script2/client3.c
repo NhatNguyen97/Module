@@ -101,7 +101,7 @@ void processing_Temp(int temp1, int temp2,  int a, char *msg)
         char PATH[20] = "monitor_dir/";
         char c[2] = ".";
 		char d[14] = "Temperature: ";
-		char e[3] = "oC";//
+		char e[3] = "oC";
 		x[0] = temp2 + '0';
 		b = convert_IntToChar(temp1);
 		file = strcut_2(msg,9);
@@ -119,6 +119,7 @@ void processing_Temp(int temp1, int temp2,  int a, char *msg)
 		fclose(flog);
 		if(limit > 5)
 			printf("Warning!!! The temperature is higher %doC ...\n\n", a);
+			system("ogg123 alert.ogg");
 		free(b);
 		free(x);
 		free(file);
