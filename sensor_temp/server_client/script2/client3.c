@@ -55,6 +55,15 @@ int convert_CharToInt(char *c)
 	return s;
 }
 
+void strreplace(char *c)
+{
+    int i=0;
+	for(i=0 ; i < strlen(c); i++)
+	{
+		if(c[i] == ' ')
+			c[i] = '-';
+	}
+}
 
 char *strcut_1(char *c, int n)
 {
@@ -88,23 +97,34 @@ void processing_Temp(int temp1, int temp2,  int a, char *msg)
 	{
 		char *b = (char*)calloc(4,sizeof(char));
 		char *x = (char*)calloc(4,sizeof(char));
-		char c[2] = ".";
+		char *file = (char*)calloc(16,sizeof(char));
+        char PATH[20] = "monitor_dir/";
+        char c[2] = ".";
 		char d[14] = "Temperature: ";
-		char e[3] = "oC";
+		char e[3] = "oC";//
 		x[0] = temp2 + '0';
 		b = convert_IntToChar(temp1);
-		msg[strlen(msg) -1] = '\t';
+		file = strcut_2(msg,9);
+		strreplace(file);
+        msg[strlen(msg) -1] = '\t';
 		strcat(msg, d);
 		strcat(msg, b);
 		strcat(msg, c);
 		strcat(msg, x);
 		strcat(msg, e);
 		limit++;
-		FILE *flog = fopen("temp_log.txt", "a+");
+        strcat(PATH, file);
+		FILE *flog = fopen(PATH, "a+");
 		fprintf(flog, "%s\n", msg);
 		fclose(flog);
 		if(limit > 5)
-			printf("Warning!!! The temperature is higher %doC ...\n\n", a); 
+			printf("Warning!!! The temperature is higher %doC ...\n\n", a);
+		free(b);
+		free(x);
+		free(file);
+		b = NULL;
+		x = NULL;
+		file = NULL;
 	}
 }
 

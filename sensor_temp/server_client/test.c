@@ -4,28 +4,23 @@
 #include <time.h>
 #include <sys/time.h>
 
-char *convert_IntToChar(int x)
-{
-	int i=1;
-	char *s1 = (char*)calloc(4,sizeof(char));
-	int *s2 = (int*)calloc(4,sizeof(int));
-	while(x > 0)
-	{
-		s2[i] = x%10;
-		x /= 10;
-		i--;
-	}
-	for(i=0 ; i<2 ; i++)
-		s1[i] = s2[i] + '0';
-	return s1;
-}
 
+void strreplace(char *c)
+{
+    int i=0;
+	for(i=0 ; i< strlen(c); i++)
+	{
+		if(c[i] == ' ')
+			c[i] = '-';
+	}
+}
 
 int main()
 {
-	int x=49;
-	char *s = (char*)calloc(4,sizeof(char));
-	s = convert_IntToChar(x);
-	printf("%s",s);
+	//char *s = (char*)calloc(64,sizeof(char));
+	char *c = (char*)calloc(64,sizeof(char));
+	gets(c);
+	strreplace(c);
+	puts(c);	
 	return 0;
 }
